@@ -23,7 +23,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     web.vm.synced_folder "www_root", "/var/www/html"
 
-    web.vm.provision :shell do |shell|
+    web.vm.provision :shell, run: "always" do |shell|
       shell.inline = "setenforce 0"
     end
 
