@@ -1,17 +1,17 @@
 FORGE
   remote: https://forgeapi.puppetlabs.com
   specs:
-    jfryman-nginx (0.2.1)
-      puppetlabs-apt (>= 1.0.0)
-      puppetlabs-concat (>= 1.1.0)
-      puppetlabs-stdlib (>= 3.0.0)
-    puppetlabs-apt (1.7.0)
-      puppetlabs-stdlib (>= 2.2.1)
-    puppetlabs-concat (1.1.2)
+    jfryman-nginx (0.3.0)
+      puppetlabs-apt (< 3.0.0, >= 1.8.0)
+      puppetlabs-concat (< 3.0.0, >= 1.1.1)
+      puppetlabs-stdlib (< 5.0.0, >= 4.2.0)
+    puppetlabs-apt (2.2.2)
+      puppetlabs-stdlib (< 5.0.0, >= 4.5.0)
+    puppetlabs-concat (2.1.0)
       puppetlabs-stdlib (< 5.0.0, >= 3.2.0)
-    puppetlabs-firewall (1.2.0)
-    puppetlabs-stdlib (4.4.0)
-    thias-php (1.0.0)
+    puppetlabs-firewall (1.8.1)
+    puppetlabs-stdlib (4.12.0)
+    thias-php (1.2.0)
 
 PATH
   remote: ./local-modules/utc-my_fw
