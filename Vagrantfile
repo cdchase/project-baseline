@@ -9,7 +9,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define :web do |web|
     web.vm.box = "centos72-min"
-    web.vm.box_url = "http://vagrant.cdchase.com/box/centos72-min/virtualbox/vagrant-centos72-min-virtualbox.box"
+    web.vm.box_url = "http://vagrant.cdchase.com/box/centos72-min/virtualbox/vagrant-centos72-min.box"
     web.vm.box_download_checksum = "6a8a442a0ba5ac5c260323b7f55027b3c595d4f4e1c3418a19bd55207a513d9d"
     web.vm.box_download_checksum_type = "sha256"
 
