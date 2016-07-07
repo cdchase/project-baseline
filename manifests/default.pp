@@ -26,7 +26,6 @@ define web::nginx_ssl_with_redirect (
   $www_root             = "${full_web_path}/${name}/",
   $location_cfg_append  = undef,
 ) {
-
   nginx::resource::vhost { "${name}":
     ensure              => present,
     www_root            => $www_root,
@@ -40,10 +39,11 @@ define web::nginx_ssl_with_redirect (
 
   if $php {
     php::ini { '/etc/php.ini':
-      date_timezone => "America/New_York",
+      date_timezone    => "America/New_York",
+      output_buffering => "Off"
     }
     nginx::resource::location { "${name}_root":
-#      ensure              => present,
+      #      ensure              => present,
       ssl                 => $ssl,
       ssl_only            => $ssl_only,
       vhost               => "${name}",
@@ -63,7 +63,7 @@ define web::nginx_ssl_with_redirect (
   }
 }
 
-web::nginx_ssl_with_redirect { 'baseline':
+web::nginx_ssl_with_redirect { $fqdn:
   www_root => "/var/www/html",
 }
 
@@ -77,8 +77,26 @@ php::fpm::conf { 'www':
   require => Package['nginx'],
 }
 
+class { 'php::cli': }
+
+php::module { [ 'php-pear', 'php-devel' ]: }
+
+exec { '/usr/bin/pecl install xdebug':
+  creates => '/usr/lib64/php/modules/xdebug.so',
+  path    => ['/usr/bin', '/usr/sbin',],
+}
+file { '/usr/lib64/php/modules/xdebug.so':
+  mode => '755',
+}
+file{ '/etc/php.d/xdebug.ini':
+  content => "zend_extension=/usr/lib64/php/modules/xdebug.so
+  xdebug.remote_host='${fqdn}'
+  xdebug.remote_enable=1",
+  notify => Class['php::fpm::daemon'],
+}
+
 firewall { '100 allow http and https access':
   dport   => [80, 443],
-  proto  => tcp,
-  action => accept,
+  proto   => tcp,
+  action  => accept,
 }
