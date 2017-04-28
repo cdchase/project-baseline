@@ -13,15 +13,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
 
-#  config.ssh.private_key_path = "../vagrant/esc_vagrant_cdc"
+  config.vm.hostname = "project-baseline.local"
 
-  config.vm.hostname = "infosessions.local"
-
-  config.hostmanager.enabled = true
-  config.hostmanager.manage_host = true
-  config.hostmanager.manage_guest = true
-  config.hostmanager.ignore_private_ip = false
-  config.hostmanager.include_offline = true
+  unless Vagrant.has_plugin?('vagrant-hostmanager')
+    puts 'vagrant-hostmanager plugin is not installed!'
+  else
+    config.hostmanager.enabled = true
+    config.hostmanager.manage_host = true
+    config.hostmanager.manage_guest = true
+    config.hostmanager.ignore_private_ip = false
+    config.hostmanager.include_offline = true
+  end
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
@@ -55,7 +57,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
 
-  config.vm.synced_folder "./html", "/var/www/html", group: "nginx", mount_options: ["dmode=775,fmode=664"]
+  config.vm.synced_folder "./html", "/var/www/html"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -63,7 +65,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #
 
   config.vm.provider "virtualbox" do |vb|
-    vb.name = "InformationSessions"
+    vb.name = "ProjectBaseline"
   #   # Display the VirtualBox GUI when booting the machine
   #   vb.gui = true
   #
@@ -91,6 +93,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # SHELL
 
   # FIX This! Need to be able to set context for httpd on share mount for /var/www/httpd
+  # See: https://github.com/mitchellh/vagrant/issues/6970
+  # https://stackoverflow.com/a/27316774/7475155
   config.vm.provision :shell, run: "always" do |shell|
     shell.inline = "setenforce 0"
   end
@@ -99,12 +103,36 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #config.vm.provision :shell, path: "../vagrant/remove_puppet_unless_modern.sh"  # in case the VM has old crap installed...
   #config.vm.provision :shell, path: "../vagrant/install_puppet_on_centos_7_x.sh"
 
-  config.librarian_puppet.placeholder_filename = ".placeholder"
-  config.vm.provision "puppet" do |puppet|
-    puppet.manifests_path = "manifests"
-    puppet.manifest_file = "default.pp"
-    puppet.environment_path = "../puppet/environments"
-    puppet.environment = "development"
-    puppet.module_path = "modules"
+  config.vm.provision "librarian_puppet" do |librarian_puppet|
+    librarian_puppet.puppetfile_dir       = "puppet"
+    librarian_puppet.placeholder_filename = ".gitignore"
+    librarian_puppet.use_v1_api           = '1'
+    librarian_puppet.destructive          = false
+    librarian_puppet.path                 = "./puppet/environments/development/modules"
+
   end
+
+  config.vm.provision "puppet" do |puppet|
+      puppet.manifests_path   = "puppet/environments/development/manifests"
+      puppet.manifest_file    = "default.pp"
+      puppet.environment_path = "puppet/environments"
+      puppet.environment      = "development"
+      puppet.module_path      = "puppet/environments/development/modules"
+      puppet.options          = [
+                                  '--verbose',
+                                  '--report',
+                                  '--trace',
+                                  '--debug',
+                                  '--strict_variables',
+                                  '--summarize',
+                                  '--graph'
+                                ]
+    end
+
+  config.vm.provision :shell do |shell|
+    shell.inline = "sudo umount /var/www/html; sudo mount -t vboxsf -o uid=`id -u nginx`,gid=`id -g nginx`,dmode=775,fmode=664,context='system_u:object_r:httpd_sys_content_t' var_www_html /var/www/html"
+  end
+
+  config.vm.provision :hostmanager
+
 end

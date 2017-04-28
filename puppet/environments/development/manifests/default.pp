@@ -13,11 +13,31 @@ class { 'firewall': }
 
 class { 'nginx': }
 
+define xdebug ($host = $fqdn){
+  package { 'php-pear': ensure => 'installed' }
+  package { 'php-devel': ensure => 'installed' }
+  exec { '/usr/bin/pecl install xdebug':
+    creates => '/usr/lib64/php/modules/xdebug.so',
+    path    => ['/usr/bin', '/usr/sbin',],
+    require => [Class['php::fpm::daemon'], Package['php-pear'],Package['php-devel']],
+  }
+  file { '/usr/lib64/php/modules/xdebug.so':
+    mode => '755',
+  }
+  file { '/etc/php.d/xdebug.ini':
+    content => "zend_extension=/usr/lib64/php/modules/xdebug.so
+xdebug.remote_host='${host}'
+xdebug.remote_enable=1",
+    notify  => Class['php::fpm::daemon'],
+  }
+}
+
 /* Web configuration */
+
 
 $full_web_path = '/var/www'
 
-define web::nginx_ssl_with_redirect (
+define web (
   # $backend_port         = 9000,
   $php                  = true,
   $ssl                  = false,
@@ -63,7 +83,7 @@ define web::nginx_ssl_with_redirect (
   }
 }
 
-web::nginx_ssl_with_redirect { $fqdn:
+web { $fqdn:
   www_root => "/var/www/html",
 }
 
@@ -79,20 +99,8 @@ php::fpm::conf { 'www':
 
 class { 'php::cli': }
 
-php::module { [ 'php-pear', 'php-devel' ]: }
-
-exec { '/usr/bin/pecl install xdebug':
-  creates => '/usr/lib64/php/modules/xdebug.so',
-  path    => ['/usr/bin', '/usr/sbin',],
-}
-file { '/usr/lib64/php/modules/xdebug.so':
-  mode => '755',
-}
-file{ '/etc/php.d/xdebug.ini':
-  content => "zend_extension=/usr/lib64/php/modules/xdebug.so
-  xdebug.remote_host='${fqdn}'
-  xdebug.remote_enable=1",
-  notify => Class['php::fpm::daemon'],
+xdebug { $fqdn:
+  host => $fqdn
 }
 
 firewall { '100 allow http and https access':

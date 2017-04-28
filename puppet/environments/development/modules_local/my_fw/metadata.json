@@ -1,7 +1,7 @@
 {
-  "name": "utc-my_fw",
+  "name": "my_fw",
   "version": "0.1.0",
-  "author": "utc",
+  "author": "C. Daniel Chase",
   "summary": "Default iptables configuration",
   "license": "Apache 2.0",
   "source": "",

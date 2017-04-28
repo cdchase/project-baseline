@@ -25,7 +25,12 @@ forge "https://forgeapi.puppetlabs.com"
 # mod 'puppetlabs-apache', '0.6.0', :github_tarball => 'puppetlabs/puppetlabs-apache'
 
 
-mod 'jfryman-nginx'
-mod 'thias-php'
+mod 'puppet-nginx'
+
+mod 'voxpupuli-php',
+    :git => 'git://github.com/voxpupuli/puppet-php.git'
+
 mod 'puppetlabs-firewall'
-mod 'utc-my_fw', :path => "./local-modules/utc-my_fw"
+
+mod 'my_fw',
+    :path => "./puppet/environments/development/modules_local/my_fw"
