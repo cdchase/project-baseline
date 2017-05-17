@@ -1,0 +1,31 @@
+{
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc"]
+  },
+  "source": {
+    "include": ["./package.json","./README.md","./src"],
+    "includePattern": ".+\\.js$",
+    "excludePattern": "(docs)"
+  },
+  "plugins": [],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": true,
+    "systemName": "Project Baseline",
+    "footer": "Created by C. Daniel Chase",
+    "copyright": "2017",
+    "navType": "vertical",
+    "theme": "spacelab",
+    "linenums": true,
+    "collapseSymbols": true,
+    "inverseNav": false
+  },
+  "opts": {
+    "template": "/usr/local/Homebrew/lib/node_modules/ink-docstrap/template",
+    "encoding": "utf8",
+    "destination": "docs/js",
+    "recurse": true,
+    "private": true
+  }
+}

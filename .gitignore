@@ -1,0 +1,4 @@
+/build/
+/html/
+/puppet/environments/development/modules/
+/vendor/

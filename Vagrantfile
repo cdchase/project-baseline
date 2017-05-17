@@ -109,7 +109,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     librarian_puppet.use_v1_api           = '1'
     librarian_puppet.destructive          = false
     librarian_puppet.path                 = "./puppet/environments/development/modules"
-
   end
 
   config.vm.provision "puppet" do |puppet|
@@ -131,6 +130,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provision :shell do |shell|
     shell.inline = "sudo umount /var/www/html; sudo mount -t vboxsf -o uid=`id -u nginx`,gid=`id -g nginx`,dmode=775,fmode=664,context='system_u:object_r:httpd_sys_content_t' var_www_html /var/www/html"
+#    shell.inline = "sudo umount var_www_html; if [ ! -d /media/var_www_html ]; then sudo mkdir /media/var_www_html; fi; sudo mount -t vboxsf -o uid=`id -u nginx`,gid=`id -g nginx`,dmode=775,fmode=664 var_www_html /media/var_www_html; if [ ! -L /var/www/html ]; then sudo ln -s /media/var_www_html /var/www/html; fi; sudo chcon -R --reference=/var/www /var/www/html"
   end
 
   config.vm.provision :hostmanager

@@ -11,8 +11,8 @@ const DashboardPlugin = require('webpack-dashboard/plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const extractCSS = new ExtractTextPlugin({
-  filename: '[name].[contenthash].css',
-  disable: process.env.NODE_ENV === 'development'
+  filename: '[name].css',
+//  disable: process.env.NODE_ENV === 'development'
 });
 
 const ENV = process.env.NODE_ENV = 'development';
@@ -51,17 +51,40 @@ module.exports = {
       {
         test: /\.css$/,
         exclude: path.resolve(__dirname, 'node_modules'),
-        use: [
-          extractCSS.extract({loader: 'style-loader'}),
-          {
-            loader: 'css-loader?sourceMap',
-            options: {
-              modules: true,
-              importLoaders: 1
-            }
-          },
-          {loader: 'postcss-loader?sourceMap=inline'}
-        ]
+        use: extractCSS.extract({
+          fallback: 'style-loader',
+          use: [
+            {
+              loader: 'css-loader',
+              options: {
+                importLoaders: 1,
+                sourceMap: true,
+                url: false
+              }
+            },
+            'postcss-loader?sourceMap=inline'
+          ]
+        }),
+      },
+      {
+        test: /\.scss$/,
+        exclude: path.resolve(__dirname, 'node_modules'),
+        use: extractCSS.extract({
+          fallback: 'style-loader',
+          use: [
+            {
+              loader: 'css-loader',
+              options: {
+                importLoaders: 2,
+                sourceMap: true,
+                url: false
+              }
+            },
+            'postcss-loader?sourceMap=inline',
+            'resolve-url-loader?sourceMap',
+            'sass-loader?sourceMap'
+          ]
+        }),
       },
       {
         test: /\.html$/,
@@ -74,30 +97,31 @@ module.exports = {
       // Load images
       {
         test: /\.jpg/,
-        use: ['url-loader?limit=10000&mimetype=image/jpg']
+        use: ['file-loader?emitFile=false']
       },
       {
         test: /\.gif/,
-        use: ['url-loader?limit=10000&mimetype=image/gif']
+        use: ['file-loader?emitFile=false']
       },
       {
         test: /\.png/,
-        use: ['url-loader?limit=10000&mimetype=image/png']
+        use: ['file-loader?emitFile=false']
       },
       {
         test: /\.svg/,
-        use: ['url-loader?limit=10000&mimetype=image/svg']
+        use: ['file-loader?emitFile=false']
       },
 
       // Load fonts
       {
-        test: /\.woff(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-        use: ['url-loader?limit=10000&mimetype=application/font-woff']
+        test: /\.woff2?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        use: ['file-loader?emitFile=false']
       },
       {
         test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-        use: ['file-loader']
+        use: ['file-loader?emitFile=false']
       },
+
       {
         test: /\.jsx?$/,
         exclude: path.resolve(__dirname, 'node_modules'),
@@ -118,7 +142,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: '[name].bundle.js',
-    publicPath: '/media/js/crm/',
+    publicPath: '/static/',
     libraryTarget: 'var',
     library: 'crm'
   },
@@ -128,12 +152,13 @@ module.exports = {
     'jquery': 'jQuery'
   },
   plugins: [
-//        new CommonsChunkPlugin({name: 'vendor', filename: 'vendor.bundle.js', minChunks: Infinity}),
+//        new CommonsChunkPlugin({name: 'hobsons', filename: 'hobsons.bundle.js', minChunks: Infinity}),
     new DefinePlugin({'webpack': {'ENV': JSON.stringify(metadata.ENV)}}),
     new ProvidePlugin({jQuery: 'jquery', jquery: 'jquery', $: 'jquery', 'window.jQuery': 'jquery'}),
-//        new UglifyJSPlugin({sourceMap: true}),
+//        new UglifyJSPlugin({compress: true, sourceMap: true}),
     new DashboardPlugin({port: metadata.dashboardPort}),
     new webpack.LoaderOptionsPlugin({debug: true}),
-    new extractCSS('style.css', {allChunks: false})
+    new webpack.HotModuleReplacementPlugin(),
+    extractCSS
   ]
 };
